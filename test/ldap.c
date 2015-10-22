@@ -6,6 +6,7 @@
 #include <ldap.h>
 #include <stdio.h>
 #include <string.h>
+#include <wchar.h>
 #include "ldap.h"
 
 #define LDAP_SERVER "ldap://ms.uhbs.ch:389"
@@ -43,6 +44,17 @@ LDAP  *ldap_connect(char* uri, char* binddn, char* bind_pw) {
 	return ld;
 }
 
+char *guid2str(char *raw) {
+	char str[40];
+	sprintf(str, "{%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX}",
+		raw[3], raw[2], raw[1], raw[0], raw[5], raw[4],
+		raw[7], raw[6], raw[8], raw[9], raw[10], raw[11],
+		raw[12], raw[13], raw[14], raw[15]
+	);
+	
+	return str;
+}
+
 void ldap_display_attributes(LDAP *ld, LDAPMessage *msg) {
 	// get all attributes
 	char *a;
@@ -58,13 +70,20 @@ void ldap_display_attributes(LDAP *ld, LDAPMessage *msg) {
 		if ( ( vals = ldap_get_values( ld, msg, a ) ) != NULL ) {
 			for ( i = 0; vals[i] != NULL; i++ ) {
 				// Print the name of the attribute and each value
-				printf( "%s: %s\n", a, vals[i] );
+				if (strcmp(a, "objectGUID") == 0)
+					printf("%s: %s\n", a, guid2str(vals[i]));
+				else
+					printf( "%s: %s\n", a, vals[i] );
 			}
 			// Free the attribute values from memory when done.
 			ldap_value_free(vals);
 		}
 	}
 	ldap_memfree(a);
+	
+	if ( ber != NULL ) {
+		ber_free( ber, 0 );
+	}
 }
 
 int main(int argc, char** argv) {
