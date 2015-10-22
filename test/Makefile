@@ -1,4 +1,4 @@
 
 
 ldap:
-	gcc -v -o ldap -stdlib="libc++" ldap.c
+	gcc -v -o ldap -lldap ldap.c
