@@ -1,7 +1,7 @@
-/*
-	LDAP Search example
-	Reference: http://www-archive.mozilla.org/directory/csdk-docs/search.htm
-*/
+/**
+ * LDAP Search example
+ * Reference: http://www-archive.mozilla.org/directory/csdk-docs/search.htm
+ */
 
 #include <ldap.h>
 #include <stdio.h>
