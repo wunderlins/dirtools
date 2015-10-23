@@ -18,42 +18,22 @@
 #define LDAP_SEARCH_BASE "ou=USB,dc=ms,dc=uhbs,dc=ch"
 #define LDAP_GROUP_FILTER "(&(objectClass=group)(cn=*B_M_Anaesthesiologie*))"
 
-typedef struct ldconn {
-	LDAP *ld;
-	char *binddn;
-	char *uri;
-	char *pass;
-	char *search_base;
-	char *search_filter;
-	LDAPMessage *res;
-} LDConn;
-
-LDAP *ldap_connect(char* uri, char* binddn, char* bind_pw) {
-	int   rc;
-	LDAP *ld;
+int ld_conn(LDConn *ldconn) {
+	int rc;
 	
-	//sprintf(bind_dn, LDAP_BINDDN, LDAP_USER);
-	printf("Connecting as %s\n", binddn);
-	
-	if(ldap_initialize(&ld, uri)) {
+	if(ldap_initialize(&(ldconn->ld), ldconn->uri)) {
 		perror("ldap_initialize");
-		return 0;
+		return 1;
 	}
 	
-	/*
-	printf("ldap server: %s\n", uri);
-	printf("ldap binddn: %s\n", binddn);
-	printf("ldap bindpw: %s\n", bind_pw);
-	*/
-	
-	rc = ldap_simple_bind_s(ld, binddn, bind_pw);
+	rc = ldap_simple_bind_s(ldconn->ld, ldconn->binddn, ldconn->pass);
 	if(rc != LDAP_SUCCESS) {
 		fprintf(stderr, "ldap_simple_bind_s: %s\n", ldap_err2string(rc));
-		return 0;
+		return 2;
 	}
 	printf( "Successfully authenticated\n" );
 	
-	return ld;
+	return 0;
 }
 
 /**
@@ -167,23 +147,27 @@ void ldap_display_attributes(LDAP *ld, LDAPMessage *msg) {
 }
 
 int main(int argc, char** argv) {
-	LDAP      *ld;
-	int       rc;
-	char      bind_dn[254];
+	LDAP        *ld;
+	int         rc;
+	char        bind_dn[254];
 	LDAPMessage *res, *msg;
-	int msgtype;
-	char *dn;
-	LDConn *conn;
+	int         msgtype;
+	char        *dn;
+	LDConn      *conn; // = (LDConn*) malloc(sizeof(LDConn));
+	int         num_entries;
+	int         num_refs;
 	
 	// setup our connection data structure
-	sprintf(conn->binddn, LDAP_BINDDN, LDAP_USER);
+	sprintf(bind_dn, LDAP_BINDDN, LDAP_USER);
+	
+	conn->binddn = bind_dn;
 	conn->pass = LDAP_PASS;
 	conn->search_base = LDAP_SEARCH_BASE;
 	conn->search_filter = LDAP_GROUP_FILTER;
 	conn->uri = LDAP_SERVER;
 	
 	// prepare the connection
- 	conn->ld = ldap_connect(conn->uri, conn->binddn, conn->pass);
+ 	ld_conn(conn);
  	if (conn->ld == 0) {
 		fprintf(stderr, "failed to connect, aborting.\n");
  		return 1;
@@ -203,9 +187,6 @@ int main(int argc, char** argv) {
 	}
 	
 	// loop over result
-	int num_entries = 0;
-	int num_refs = 0;
-	
 	num_entries = ldap_count_entries(conn->ld, conn->res);
 	num_refs = ldap_count_references(conn->ld, conn->res);
 	printf("Number of entried: %d, number of References: %d\n", num_entries, num_refs);
