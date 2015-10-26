@@ -1,0 +1,189 @@
+# extended LDIF
+#
+# LDAPv3
+# base <dc=intra,dc=wunderlin,dc=net> with scope subtree
+# filter: (objectclass=*)
+# requesting: ALL
+#
+
+# intra.wunderlin.net
+dn: dc=intra,dc=wunderlin,dc=net
+o: intra.wunderlin.net
+dc: intra
+ou: intra
+description: intra
+objectClass: gosaAcl
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+objectClass: gosaDepartment
+gosaAclEntry: 0:psub:Y249U3lzdGVtIEFkbWluaXN0cmF0b3ItZ29hc2FkbWluLG91PXBlb3BsZ
+ SxkYz1pbnRyYSxkYz13dW5kZXJsaW4sZGM9bmV0:all/all;cmdrw
+
+# admin, intra.wunderlin.net
+dn: cn=admin,dc=intra,dc=wunderlin,dc=net
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+objectClass: posixAccount
+objectClass: top
+cn: admin
+description: LDAP administrator
+uid: admin
+homeDirectory: /home/admin
+gidNumber: 4000
+uidNumber: 4000
+userPassword:: e2NyeXB0fXZqOFpEdzFKQlpqQUU=
+
+# Groups, intra.wunderlin.net
+dn: ou=Groups,dc=intra,dc=wunderlin,dc=net
+objectClass: organizationalUnit
+objectClass: top
+ou: Groups
+
+# default, Groups, intra.wunderlin.net
+dn: cn=default,ou=Groups,dc=intra,dc=wunderlin,dc=net
+cn: default
+gidNumber: 500
+objectClass: posixGroup
+objectClass: top
+memberUid: 4001
+memberUid: 4000
+
+# Users, intra.wunderlin.net
+dn: ou=Users,dc=intra,dc=wunderlin,dc=net
+objectClass: organizationalUnit
+objectClass: top
+ou: Users
+
+# wus, Groups, intra.wunderlin.net
+dn: cn=wus,ou=Groups,dc=intra,dc=wunderlin,dc=net
+gidNumber: 4001
+cn: wus
+objectClass: posixGroup
+objectClass: top
+memberUid: 4001
+
+# wus, Users, intra.wunderlin.net
+dn: cn=wus,ou=Users,dc=intra,dc=wunderlin,dc=net
+uid: wus
+uidNumber: 4001
+homeDirectory: /home/wus
+gidNumber: 4001
+cn: wus
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+objectClass: posixAccount
+userPassword:: e2NyeXB0fUhHei4waGxNTElBTUU=
+sn: Wunderlin
+givenName: Simon
+loginShell: /bin/bash
+
+# people, intra.wunderlin.net
+dn: ou=people,dc=intra,dc=wunderlin,dc=net
+objectClass: organizationalUnit
+ou: people
+
+# System Administrator-goasadmin, people, intra.wunderlin.net
+dn: cn=System Administrator-goasadmin,ou=people,dc=intra,dc=wunderlin,dc=net
+objectClass: top
+objectClass: person
+objectClass: gosaAccount
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+givenName: System
+sn: Administrator
+cn: System Administrator-goasadmin
+userPassword:: e0NSWVBUfSQxJHc3WEtlYUIyJGZpenJ3MlZLRTFqMGI0QlRtSjF5SjE=
+uid: gosaadmin
+
+# GOsaLdapEncoding_\2C_\22_(_)_\2B_/, intra.wunderlin.net
+dn: o=GOsaLdapEncoding_\2C_\22_(_)_\2B_/,dc=intra,dc=wunderlin,dc=net
+objectClass: top
+objectClass: organization
+o: GOsaLdapEncoding_,_"_(_)_+_/
+description: GOsa character encoding test-object.
+
+# systems, intra.wunderlin.net
+dn: ou=systems,dc=intra,dc=wunderlin,dc=net
+objectClass: organizationalUnit
+ou: systems
+
+# configs, systems, intra.wunderlin.net
+dn: ou=configs,ou=systems,dc=intra,dc=wunderlin,dc=net
+objectClass: organizationalUnit
+ou: configs
+
+# gosa, configs, systems, intra.wunderlin.net
+dn: ou=gosa,ou=configs,ou=systems,dc=intra,dc=wunderlin,dc=net
+objectClass: organizationalUnit
+ou: gosa
+
+# foo.wunderlin.net.intra.wunderlin.net
+dn: dc=foo.wunderlin.net,dc=intra,dc=wunderlin,dc=net
+dc: foo.wunderlin.net
+ou: foo.wunderlin.net
+description: Foo
+manager: cn=System Administrator-goasadmin,ou=people,dc=intra,dc=wunderlin,dc=
+ net
+objectClass: domain
+objectClass: top
+objectClass: gosaDepartment
+
+# Home, intra.wunderlin.net
+dn: ou=Home,dc=intra,dc=wunderlin,dc=net
+ou: Home
+description: The home base
+manager: cn=System Administrator-goasadmin,ou=people,dc=intra,dc=wunderlin,dc=
+ net
+objectClass: organizationalUnit
+objectClass: top
+objectClass: gosaDepartment
+
+# Simon Wunderlin, people, intra.wunderlin.net
+dn: cn=Simon Wunderlin,ou=people,dc=intra,dc=wunderlin,dc=net
+sn: Wunderlin
+givenName: Simon
+uid: wunderlins
+homePostalAddress: Liestalerstrasse 19
+l: Switzerland
+st: Basel-Land
+telephoneNumber: +41613287426
+cn: Simon Wunderlin
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: gosaAccount
+sambaLMPassword: B072D36C188702F1F9393D97E7A1873C
+sambaNTPassword: 1E222E979ACB3C93381BF15685DBBA4B
+sambaPwdLastSet: 1445788042
+sambaBadPasswordCount: 0
+sambaBadPasswordTime: 0
+userPassword:: e0NSWVBUfSQxJFRVakRyS0JjJHBHVWlDVzV3bDcvbThTZ0cxOGcwSjA=
+
+# sudoers, intra.wunderlin.net
+dn: ou=sudoers,dc=intra,dc=wunderlin,dc=net
+objectClass: organizationalUnit
+ou: sudoers
+
+# groups, foo.wunderlin.net.intra.wunderlin.net
+dn: ou=groups,dc=foo.wunderlin.net,dc=intra,dc=wunderlin,dc=net
+objectClass: organizationalUnit
+ou: groups
+
+# grp, groups, foo.wunderlin.net.intra.wunderlin.net
+dn: cn=grp,ou=groups,dc=foo.wunderlin.net,dc=intra,dc=wunderlin,dc=net
+cn: grp
+gosaGroupObjects: [G]
+member: cn=wus,ou=Groups,dc=intra,dc=wunderlin,dc=net
+objectClass: top
+objectClass: gosaGroupOfNames
+
+# search result
+search: 2
+result: 0 Success
+
+# numResponses: 20
+# numEntries: 19
