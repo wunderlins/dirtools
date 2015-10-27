@@ -1,11 +1,20 @@
-.PHONY: ldap cmd
+.PHONY: ldap cmd 
+
+CC=gcc
+CFLAGS=
+LIBS=-lldap -lreadline
 
 #CC = gcc
+HOSTNAME = $(shell hostname)
 
 all: ldap cmd
 
-ldap:
-	$(CC) -o ldap -lldap ldap.c
+hostname:
+	@echo Hostname: $(HOSTNAME)
+	
+ldap: hostname
+	$(CC) -D $(HOSTNAME) -o ldap $(LIBS) $(CFLAGS) ldap.c
 
 cmd:
-	$(CC) -o cmd -lreadline cmd.c
+	$(CC) -D $(HOSTNAME) -o cmd $(LIBS) $(CFLAGS) cmd.c
+

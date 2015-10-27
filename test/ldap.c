@@ -11,12 +11,23 @@
 
 #include "ldap.h"
 
-#define LDAP_SERVER "ldap://ms.uhbs.ch:389"
-#define LDAP_USER "muana"
-#define LDAP_PASS "anaana"
-#define LDAP_BINDDN "cn=%s,ou=GenericMove,ou=Users,ou=USB,dc=ms,dc=uhbs,dc=ch"
-#define LDAP_SEARCH_BASE "ou=USB,dc=ms,dc=uhbs,dc=ch"
-#define LDAP_GROUP_FILTER "(&(objectClass=group)(cn=*B_M_Anaesthesiologie*))"
+#ifdef wus-desktop4
+	#define LDAP_SERVER "ldap://ms.uhbs.ch:389"
+	#define LDAP_USER "muana"
+	#define LDAP_PASS "******"
+	#define LDAP_BINDDN "cn=%s,ou=GenericMove,ou=Users,ou=USB,dc=ms,dc=uhbs,dc=ch"
+	#define LDAP_SEARCH_BASE "ou=USB,dc=ms,dc=uhbs,dc=ch"
+	#define LDAP_GROUP_FILTER "(&(objectClass=group)(cn=*B_M_Anaesthesiologie*))"
+#endif
+
+#ifdef shell1
+	#define LDAP_SERVER "ldap://dir.intra.wunderlin.net:389"
+	#define LDAP_USER "admin"
+	#define LDAP_PASS "****"
+	#define LDAP_SEARCH_BASE "dc=intra,dc=wunderlin,dc=net"
+	#define LDAP_BINDDN "cn=%s,dc=intra,dc=wunderlin,dc=net"
+	#define LDAP_GROUP_FILTER "(objectClass=*)"
+#endif
 
 int ld_conn(LDConn *ldconn) {
 	int rc;
@@ -93,7 +104,7 @@ char *guid2str(const unsigned char *raw) {
 	u->node[5] = raw[15];
 	*/
 	
-	char str[40];
+	unsigned char *str = malloc(sizeof(char) * 16);
 	
 	sprintf(str, "{%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX}",
 		raw[3], raw[2], raw[1], raw[0], raw[5], raw[4],
@@ -157,6 +168,11 @@ int main(int argc, char** argv) {
 	int         num_entries;
 	int         num_refs;
 	
+	// read config file
+	char *hostname;
+	size_t len;
+	int ret = gethostname(hostname, len);
+	
 	// setup our connection data structure
 	sprintf(bind_dn, LDAP_BINDDN, LDAP_USER);
 	
@@ -165,6 +181,8 @@ int main(int argc, char** argv) {
 	conn->search_base = LDAP_SEARCH_BASE;
 	conn->search_filter = LDAP_GROUP_FILTER;
 	conn->uri = LDAP_SERVER;
+	
+	printf("Connecting to: %s\n", conn->uri);
 	
 	// prepare the connection
  	ld_conn(conn);
