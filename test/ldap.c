@@ -5,11 +5,14 @@
 
 #include <ldap.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
 
 #include "ldap.h"
+
+#define VERBOUS 1
 
 #ifdef wus-desktop4
 	#define LDAP_SERVER "ldap://ms.uhbs.ch:389"
@@ -42,7 +45,9 @@ int ld_conn(LDConn *ldconn) {
 		fprintf(stderr, "ldap_simple_bind_s: %s\n", ldap_err2string(rc));
 		return 2;
 	}
-	printf( "Successfully authenticated\n" );
+	#if VERBOUS == 1
+		printf( "Successfully authenticated\n" );
+	#endif
 	
 	return 0;
 }
@@ -142,7 +147,8 @@ void ldap_display_attributes(LDAP *ld, LDAPMessage *msg) {
 			for ( i = 0; vals[i] != NULL; i++ ) {
 				// Print the name of the attribute and each value
 				if (strcmp(a, "objectGUID") == 0)
-					printf("%s: %s\n", a, guid2str(vals[i]));
+					//FIXME: malloc problem with this routine // printf("%s: %s\n", a, guid2str(vals[i]));
+					printf( "%s: %s\n", a, vals[i] );
 				else
 					printf( "%s: %s\n", a, vals[i] );
 			}
@@ -157,6 +163,22 @@ void ldap_display_attributes(LDAP *ld, LDAPMessage *msg) {
 	}
 }
 
+void usage() {
+	printf("Usage: ldap -H ldapuri -b basdn -D binddn -w passwd <search filter>\n");
+}
+
+/**
+ * ldap -H ldapuri -b basdn -D binddn -w passwd <search filter>
+ * ldap -H ldapuri -b basdn -D binddn -W <search filter>
+ *
+ * Command line arguments
+ * -b basedn
+ * -D binddn
+ * -H uri
+ * -w passwd
+ * -W (ask for password)
+ */
+
 int main(int argc, char** argv) {
 	LDAP        *ld;
 	int         rc;
@@ -164,16 +186,86 @@ int main(int argc, char** argv) {
 	LDAPMessage *res, *msg;
 	int         msgtype;
 	char        *dn;
-	LDConn      *conn; // = (LDConn*) malloc(sizeof(LDConn));
+	LDConn      *conn = (LDConn*) malloc(sizeof(LDConn));
 	int         num_entries;
 	int         num_refs;
 	
+	char *uri, *search_base, *binddn, *pass;
+				
+	opterr = 0;
+	int askpass = 0;
+	char c;
+	while ((c = getopt (argc, argv, "H:D:b:w:W")) != -1) {
+		switch (c)	{
+			case 'H':
+				uri = (char*) malloc(sizeof(char)*(strlen(optarg)+1));
+				strncpy(uri, optarg, strlen(optarg)+1);
+				//printf("uri %d, optarg %d, len %d, %s\n", sizeof uri, sizeof optarg, strlen(optarg), optarg);
+				conn->uri = uri;
+				#if VERBOUS == 1
+					printf("uri: %s\n", conn->uri);
+				#endif
+				break;
+			case 'b':
+				search_base = (char*) malloc(sizeof(char)*(strlen(optarg)+1));
+				strncpy(search_base, optarg, strlen(optarg)+1);
+				conn->search_base = search_base;
+				#if VERBOUS == 1
+					printf("search_base: %s\n", conn->search_base);
+				#endif
+				break;
+			case 'D':
+				binddn = (char*) malloc(sizeof(char)*(strlen(optarg)+1));
+				strncpy(binddn, optarg, strlen(optarg));
+				conn->binddn = binddn;
+				#if VERBOUS == 1
+					printf("binddn: %s\n", conn->binddn);
+				#endif
+				break;
+			case 'w':
+				pass = (char*) malloc(sizeof(char)*(strlen(optarg)+1));
+				strncpy(pass, optarg, strlen(optarg));
+				conn->pass = pass;
+				#if VERBOUS == 1
+					printf("pass: %s\n", conn->pass);
+				#endif
+				break;
+			case 'W':
+				askpass = 1;
+				break;
+			/*
+			default:
+				printf("Unknown argument %s\n", c);
+			*/
+		}
+	}
+	
+	//printf("Connecting to: %s\n", conn->uri);
+
+	// fetch the search filter
+	if (optind < argc) {
+		conn->search_filter = argv[optind];
+		#if VERBOUS == 1
+			printf("search_filter: %s\n", conn->search_filter);
+		#endif
+	}
+	
+	// check if all required command line attributs have been set
+	if (conn->pass == NULL || conn->binddn == NULL || conn->uri == NULL || 
+	    conn->search_base == NULL || conn->search_filter == NULL) {
+		usage();
+		return 1;
+	}
+
 	// read config file
+	/*
 	char *hostname;
 	size_t len;
 	int ret = gethostname(hostname, len);
+	*/
 	
 	// setup our connection data structure
+	/*
 	sprintf(bind_dn, LDAP_BINDDN, LDAP_USER);
 	
 	conn->binddn = bind_dn;
@@ -181,7 +273,7 @@ int main(int argc, char** argv) {
 	conn->search_base = LDAP_SEARCH_BASE;
 	conn->search_filter = LDAP_GROUP_FILTER;
 	conn->uri = LDAP_SERVER;
-	
+	*/
 	printf("Connecting to: %s\n", conn->uri);
 	
 	// prepare the connection
@@ -197,7 +289,9 @@ int main(int argc, char** argv) {
 	if (rc != LDAP_SUCCESS) {
 		if (ld != NULL) {
 			ldap_unbind_ext(conn->ld, NULL, NULL);
-			printf("Disconnected.\n");
+			#if VERBOUS == 1
+				printf("Disconnected.\n");
+			#endif
 		}
 		
 		fprintf(stderr, "ldap_simple_bind_s: %s\n", ldap_err2string(rc));

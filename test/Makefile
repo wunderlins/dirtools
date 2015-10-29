@@ -1,7 +1,7 @@
 .PHONY: ldap cmd 
 
 CC=gcc
-CFLAGS=
+CFLAGS=-g
 LIBS=-lldap -lreadline
 
 #CC = gcc
