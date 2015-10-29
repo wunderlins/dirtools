@@ -5,12 +5,25 @@ import pprint
 from datetime import datetime
 import ldap.filter
 import csv
+import socket
+import imp
 
+"""
 config = {
 	"host": "ms.uhbs.ch",
 	"port": None,
 	"user": "muana",
-	"pass": "anaana",
+	"pass": None,
+	"base": "dc=ms,dc=uhbs,dc=ch", # where to look for computers
+	"search_filter": "(objectClass=user)", # search for members in these groups
+	"vdlist" : "import/VDsMQAssignedUser-10-15.csv"
+};
+"""
+
+config = {
+	"uri": None,
+	"binddn": None,
+	"pass": None,
 	"base": "dc=ms,dc=uhbs,dc=ch", # where to look for computers
 	"search_filter": "(objectClass=user)", # search for members in these groups
 	"vdlist" : "import/VDsMQAssignedUser-10-15.csv"
@@ -19,6 +32,8 @@ config = {
 
 def get_ma():
 	l = None
+	
+	"""
 	if config["port"]:
 		l = ldap.open(config["host"], config["port"])
 	else:
@@ -27,8 +42,19 @@ def get_ma():
 	l.protocol_version = ldap.VERSION3
 	username = "cn=" + config["user"] +",ou=GenericMove,ou=Users,ou=USB,dc=ms,dc=uhbs,dc=ch"
 	l.simple_bind_s(username, config["pass"])
+	"""
 	
-	#print l
+	
+	
+	l = ldap.initialize(config["uri"]+"/")
+	l.protocol_version = ldap.VERSION3
+	print config["uri"]
+	print config["binddn"]
+	print config["pass"]
+	l.simple_bind_s(config["binddn"], config["pass"])
+	
+	print l
+	return 0
 	
 	"""
 	Get All users from:
@@ -101,5 +127,28 @@ def main():
 	get_ma()
 
 if __name__ == "__main__":
+	
+	# read password
+	hostname = socket.gethostname()
+	passfile = '../etc/%s.pass' % hostname 
+	with open(passfile) as f: 
+		config["pass"] = f.read()
+		config["pass"] = config["pass"].strip() # remove trailing whitespace
+	
+	# read config
+	def read_cfg():
+		sys.path.append('../etc/')
+		if hostname == "shell1":
+			try:
+				from shell1 import *
+				config["uri"] = uri
+				config["binddn"] = binddn
+				config["base"] = basedn
+			except:
+				print("Make sure the config file '%s' exists.") % ('../etc/'+hostname+".py")
+				sys.exit(2)
+	
+	read_cfg()
+	
 	main()
 
