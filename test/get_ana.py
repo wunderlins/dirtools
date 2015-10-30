@@ -8,25 +8,13 @@ import csv
 import socket
 import imp
 
-"""
-config = {
-	"host": "ms.uhbs.ch",
-	"port": None,
-	"user": "muana",
-	"pass": None,
-	"base": "dc=ms,dc=uhbs,dc=ch", # where to look for computers
-	"search_filter": "(objectClass=user)", # search for members in these groups
-	"vdlist" : "import/VDsMQAssignedUser-10-15.csv"
-};
-"""
-
 config = {
 	"uri": None,
 	"binddn": None,
 	"pass": None,
 	"base": "dc=ms,dc=uhbs,dc=ch", # where to look for computers
 	"search_filter": "(objectClass=user)", # search for members in these groups
-	"vdlist" : "import/VDsMQAssignedUser-10-15.csv"
+	"vdlist" : "VDsMQAssignedUser-10-15.csv"
 };
 
 
@@ -46,20 +34,17 @@ def get_ma():
 	
 	
 	
-	l = ldap.initialize(config["uri"]+"/")
+	l = ldap.initialize(config["uri"])
 	l.protocol_version = ldap.VERSION3
-	print config["uri"]
-	print config["binddn"]
-	print config["pass"]
+	#print config["uri"]
+	#print config["binddn"]
+	#print config["pass"]
 	l.simple_bind_s(config["binddn"], config["pass"])
-	
-	print l
-	return 0
 	
 	"""
 	Get All users from:
-	- CN=MQ_ANA_AA,OU=Exchange_Adressbuecher,OU=PITServer,DC=ms,DC=uhbs,DC=ch
-	- CN=MQ_ANA_AA,OU=Exchange_Adressbuecher,OU=PITServer,DC=ms,DC=uhbs,DC=ch
+	- CN=MQ_ANA_LA,OU=Exchange_Adressbuecher,OU=PITServer,DC=ms,DC=uhbs,DC=ch
+	- CN=MQ_ANA_OA,OU=Exchange_Adressbuecher,OU=PITServer,DC=ms,DC=uhbs,DC=ch
 	- CN=MQ_ANA_AA,OU=Exchange_Adressbuecher,OU=PITServer,DC=ms,DC=uhbs,DC=ch
 	"""
 	cnlist = []
@@ -119,8 +104,16 @@ def get_ma():
 			if adname not in aduser:
 				continue
 			
+			# resolve the full dn of the vd
+			vddn = None
+			try:
+				r = l.search_s("OU=USB,"+config["base"], ldap.SCOPE_SUBTREE, "cn="+row[0])
+				vddn = r[0][0]
+			except:
+				pass
+			
 			ix = aduser.index(adname)
-			print row[0], " ", adname, dnlist[ix]
+			print vddn, ";", dnlist[ix]
 			
 	
 def main():
@@ -131,22 +124,26 @@ if __name__ == "__main__":
 	# read password
 	hostname = socket.gethostname()
 	passfile = '../etc/%s.pass' % hostname 
-	with open(passfile) as f: 
-		config["pass"] = f.read()
-		config["pass"] = config["pass"].strip() # remove trailing whitespace
+	try:
+		with open(passfile) as f: 
+			config["pass"] = f.read()
+			config["pass"] = config["pass"].strip() # remove trailing whitespace
+	except:
+		print("Error while loading password file %s") % passfile
+		sys.exit(2)
 	
 	# read config
 	def read_cfg():
 		sys.path.append('../etc/')
-		if hostname == "shell1":
-			try:
-				from shell1 import *
-				config["uri"] = uri
-				config["binddn"] = binddn
-				config["base"] = basedn
-			except:
-				print("Make sure the config file '%s' exists.") % ('../etc/'+hostname+".py")
-				sys.exit(2)
+		try:
+			#from shell1 import *
+			cfgfile = __import__(hostname)
+			config["uri"] = cfgfile.uri
+			config["binddn"] = cfgfile.binddn
+			config["base"] = cfgfile.basedn
+		except:
+			print("Make sure the config file '%s' exists.") % ('../etc/'+hostname+".py")
+			sys.exit(2)
 	
 	read_cfg()
 	
