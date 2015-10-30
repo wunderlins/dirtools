@@ -7,31 +7,29 @@ from datetime import datetime
 import ldap.filter
 import csv
 import socket
-import imp
+import ldap.modlist as modlist
+
+l = None
 
 config = {
 	"uri": None,
 	"binddn": None,
 	"pass": None,
 	"base": "dc=ms,dc=uhbs,dc=ch", # where to look for computers
-	"search_filter": "(objectClass=user)", # search for members in these groups
-	"vdlist" : "VDsMQAssignedUser-10-15.csv"
+	"search_filter": "(objectClass=user)",
+	"vdlist": None,
+	"sync": []
 };
 
 
-def get_ma():
-	l = None
-	
-	l = ldap.initialize(config["uri"])
-	l.protocol_version = ldap.VERSION3
-	l.simple_bind_s(config["binddn"], config["pass"])
+def get_ma(filter, dst):
 	
 	cnlist = []
 	
 	# find groups of interest
-	f = "(|(cn=MQ_ANA_AA)(cn=MQ_ANA_OA)(cn=MQ_ANA_LA))"
+	#f = "(|(cn=MQ_ANA_AA)(cn=MQ_ANA_OA)(cn=MQ_ANA_LA))"
 	base = "OU=Exchange_Adressbuecher,OU=PITServer,"+config["base"]
-	res = l.search_s(base, ldap.SCOPE_SUBTREE, f)
+	res = l.search_s(base, ldap.SCOPE_SUBTREE, filter)
 	for r in res:
 		cnlist = cnlist + r[1]["member"]
 	
@@ -53,8 +51,8 @@ def get_ma():
 		except:
 			pass
 		
-		result.append( (u, cn, samaccountname) )
-		aduser.append(samaccountname)
+		result.append( (u, cn, samaccountname.lower()) )
+		aduser.append(samaccountname.lower())
 		dnlist.append(dn)
 		
 	#print cnlist
@@ -62,15 +60,15 @@ def get_ma():
 	
 	vdlist = []
 	#read csv file
-	with open(basepath + "../var/" + config["vdlist"], 'rb') as csvfile:
+	with open(config["vdlist"], 'rb') as csvfile:
 		hostreader = csv.reader(csvfile, delimiter=',', quotechar='"')
 		for row in hostreader:
 			adname = ""
 			try:
-				adname = row[3].split("\\")[1]
+				adname = row[3].split("\\")[1].lower()
 			except:
 				pass
-				
+			
 			if adname not in aduser:
 				continue
 			
@@ -83,12 +81,53 @@ def get_ma():
 				pass
 			
 			ix = aduser.index(adname)
-			print "%s;%s" % (vddn, dnlist[ix])
-			
+			#print "%s;%s" % (vddn, dnlist[ix])
+			vdlist.append(vddn)
+		#pp.pprint(vdlist)
+		commit(vdlist, dst)
+
+def commit(members, dn):
+	parts = dn.split(",")
+	cn = parts[0]
+	search = ",".join(parts[1:])
+
+	r = l.search_s(search, ldap.SCOPE_SUBTREE, cn)
+	res = r[0][1]
+	if "member" not in res:
+		srclist = []
+	else:
+		srclist = res["member"]
+	
+	mlist = modlist.modifyModlist({'member':srclist}, {'member':members})
+	#print dn
+	pp.pprint(mlist)
+	
+	if len(mlist) > 0:
+		l.modify_s(dn, mlist)
+
+	
 def main():
-	get_ma()
+	global l	
+	
+	l = ldap.initialize(config["uri"])
+	l.protocol_version = ldap.VERSION3
+	l.simple_bind_s(config["binddn"], config["pass"])
+	
+	for dst in config["sync"]:
+		print "=====> %s" % dst["filter"]
+		get_ma(dst["filter"], dst["to"])
+	
+	l.unbind_s()
 
 if __name__ == "__main__":
+	pp = pprint.PrettyPrinter(indent=4)
+	
+	# argument 1 must contain the path to the import file
+	try:
+		config["vdlist"] = sys.argv[1]
+	except:
+		sys.stderr.write("argument 1 must be a path to the import CSV file\n");
+		sys.exit(1)
 	
 	# read password
 	basepath = os.path.dirname(os.path.realpath(__file__)) + "/"
@@ -105,15 +144,18 @@ if __name__ == "__main__":
 	# read config
 	def read_cfg():
 		sys.path.append(basepath+'../etc/')
+		#print basepath+'../etc/'
 		try:
 			#from shell1 import *
 			cfgfile = __import__(hostname)
-			config["uri"] = cfgfile.uri
-			config["binddn"] = cfgfile.binddn
-			config["base"] = cfgfile.basedn
 		except:
-			print("Make sure the config file '%s' exists.") % ('../etc/'+hostname+".py")
+			msg = "Make sure the config file '%s' exists." % ('../etc/'+hostname+".py")
+			sys.stderr.write(msg+"\n")
 			sys.exit(2)
+		config["uri"] = cfgfile.uri
+		config["binddn"] = cfgfile.binddn
+		config["base"] = cfgfile.basedn
+		config["sync"] = cfgfile.sync
 	
 	read_cfg()
 	
