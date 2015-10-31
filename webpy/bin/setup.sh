@@ -16,7 +16,6 @@ function set_config() {
 	fi
 }
 
-
 echo "Setting up defaults ..."
 uuid=`./bin/genuuid.py`
 uuid=`echo -n $uuid`
