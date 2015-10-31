@@ -50,5 +50,11 @@ ln -s wsgilog-0.3 wsgilog
 unzip bootstrap-3.3.5-dist.zip -d ../static/
 
 cd ..
+cd static
+
+unzip ext-5.1.1-gpl.zip
+ln -s ext-5.1.1 ext
+
+cd ..
 
 
