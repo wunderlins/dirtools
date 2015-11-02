@@ -17,7 +17,7 @@ app_logfile="var/application.log"
 sql_logfile="var/sql.log"
 
 # session defaults
-session_salt="37b2c520-69f5-4f1e-a2df-5f6a2e247985"
+session_salt="89a1e5fe-1ab4-4b7b-a213-d8d72b612b6f"
 session_timeout=86400 #24 * 60 * 60, # 24 hours   in seconds
 session_dir='var'
 session_dir_prefix="session_"

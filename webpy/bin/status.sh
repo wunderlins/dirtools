@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 
 basedir="`cd $(dirname $0)/..;pwd`"; cd "$basedir"
-. lib/setenv.sh
+. $basedir/lib/setenv.sh
 
 ret=`netstat -anlt | grep $port | grep -v TIME_WAIT`
 if [[ $? == 0 ]]; then
 	echo "port $port is bound."
 	exit 1
 fi
+
+echo "port is NOT bound, service not running."
 
 exit 0
 

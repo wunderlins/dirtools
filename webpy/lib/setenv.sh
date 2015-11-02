@@ -61,11 +61,6 @@ function reload() {
 	. $basedir/lib/setenv.sh
 }
 
-function rebuild() {
-	rm $basedir/static/thumbnails/*.jpg
-	$basedir/bin/cache_images.py
-}
-
 alias bash_help="bash -c 'help'"
 
 function help() {

@@ -77,7 +77,7 @@ ln -s web.py-0.37 web
 tar xjf wsgilog-0.3.tar.bz2 
 ln -s wsgilog-0.3 wsgilog
 
-unzip bootstrap-3.3.5-dist.zip -o -d ../static/
+unzip -d ../static/ -o bootstrap-3.3.5-dist.zip
 
 cd ..
 cd static
