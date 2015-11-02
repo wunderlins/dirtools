@@ -62,6 +62,7 @@ function pass() {
 	fi
 }
 while pass; do a=1; done
+sqlite3 etc/user.db < etc/user.sql
 echo "Creating new user '$newuser' ..."
 ./bin/setuser.py "$newuser" "$newpass"
 #echo "$newpass" | hexdump
@@ -82,8 +83,8 @@ unzip -d ../static/ -o bootstrap-3.3.5-dist.zip
 cd ..
 cd static
 
-#unzip -o ext-5.1.1-gpl.zip
-#ln -s ext-5.1.1 ext
+unzip -o ext-5.1.1-gpl.zip
+ln -s ext-5.1.1 ext
 
 cd ..
 
