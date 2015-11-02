@@ -29,3 +29,4 @@ session_expired_message='Session expired'
 
 user_db="etc/user.db"
 
+web_debug=True

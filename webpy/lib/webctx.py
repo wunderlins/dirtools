@@ -14,6 +14,17 @@ import sqlite3
 
 session = None
 
+# url to class mapping
+urls = (
+  '/', 'webctx.index',
+  '/env', 'webctx.env',
+  '/json1', 'webctx.json1',
+  '/json2', 'webctx.json2',
+  '/image', 'webctx.image',
+  '/login', 'webctx.login',
+  '/bootstrap', 'webctx.bootstrap'
+)
+
 def is_dict(d):
 	""" additional template function, registered with web.template.render """
 	return type(d) is dict
@@ -179,8 +190,23 @@ class login(webctx):
 		
 		return '{"success": false}'
 
+
 class index(webctx):
 	""" Serve index page """
+	def GET(self):
+		#if not self.auth_check():
+		#	return self.render().login()
+			
+		#web.debug(auth_check)
+		#web.debug(session)
+		
+		render = web.template.render('template')
+		return render.borderlayout()
+		#return out
+
+"""
+class index(webctx):
+	"" " Serve index page " ""
 	def GET(self):
 		if not self.auth_check():
 			return self.render().login()
@@ -191,7 +217,7 @@ class index(webctx):
 		render = web.template.render('template')
 		return render.index()
 		#return out
-
+"""
 class bootstrap(webctx):
 	""" Serve bootstrap example page """
 	def GET(self):
