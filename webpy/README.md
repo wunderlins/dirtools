@@ -5,9 +5,10 @@
     git clone https://github.com/wunderlins/webpy.git
     ./bin/setup.sh
 
-
+    
 ## Run
 
-    ./bin/start.sh # must be called from the project's root directory
-    tail -f var/access.log & # continously check for errors ni log file
-    ./bin/stop.sh
+    $ . ./lib/setenv.sh
+    $ start # can be run from any directory or
+    $ <path to rootdir>/bin/start.sh # can be run from any directory
+    dito stop

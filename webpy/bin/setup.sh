@@ -16,6 +16,11 @@ function set_config() {
 	fi
 }
 
+if [[ -z `which realpath` ]]; then
+	echo "building realpath ..."
+	gcc -o bin/realpath lib/realpath.c
+fi
+
 echo "Setting up defaults ..."
 uuid=`./bin/genuuid.py`
 uuid=`echo -n $uuid`
@@ -77,8 +82,8 @@ unzip bootstrap-3.3.5-dist.zip -o -d ../static/
 cd ..
 cd static
 
-unzip -o ext-5.1.1-gpl.zip
-ln -s ext-5.1.1 ext
+#unzip -o ext-5.1.1-gpl.zip
+#ln -s ext-5.1.1 ext
 
 cd ..
 
