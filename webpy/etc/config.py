@@ -5,11 +5,11 @@
 #
 
 # application information
-meta_name="console4"
+meta_name="webpy"
 meta_version="0.0.1"
 
 # webserver port
-port=8082
+port=8090
 
 # log files
 web_logfile="var/access.log"
@@ -17,7 +17,7 @@ app_logfile="var/application.log"
 sql_logfile="var/sql.log"
 
 # session defaults
-session_salt="5de6f8cd-a119-47cc-8529-1fe3ea5c2b7c"
+session_salt="3f81e24f-5009-446b-8c66-77f3848a2bf8"
 session_timeout=86400 #24 * 60 * 60, # 24 hours   in seconds
 session_dir='var'
 session_dir_prefix="session_"
