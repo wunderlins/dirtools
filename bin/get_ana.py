@@ -86,6 +86,7 @@ def get_ma(filter, dst):
 			vdlist.append(vddn)
 		#pp.pprint(vdlist)
 		commit(vdlist, dst)
+		return len(vdlist)
 
 def commit(members, dn):
 	parts = dn.split(",")
@@ -114,10 +115,12 @@ def main():
 	l.protocol_version = ldap.VERSION3
 	l.simple_bind_s(config["binddn"], config["pass"])
 	
+	count = 0
 	for dst in config["sync"]:
 		print "=====> %s" % dst["filter"]
-		get_ma(dst["filter"], dst["to"])
+		count += get_ma(dst["filter"], dst["to"])
 	
+	print "Total count of VDs: %s" % count
 	l.unbind_s()
 
 if __name__ == "__main__":

@@ -17,6 +17,9 @@ def disconnect():
 def connect():
 	global _conn
 	
+	if _conn != None:
+		return _conn
+	
 	_conn = ldap.initialize(config["uri"])
 	_conn.protocol_version = ldap.VERSION3
 	_conn.set_option(ldap.OPT_REFERRALS,0) # prevent bug in AD when searching basedn
