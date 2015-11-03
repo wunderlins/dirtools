@@ -19,17 +19,23 @@ def connect():
 	
 	_conn = ldap.initialize(config["uri"])
 	_conn.protocol_version = ldap.VERSION3
+	_conn.set_option(ldap.OPT_REFERRALS,0) # prevent bug in AD when searching basedn
 	_conn.simple_bind_s(config["binddn"], config["pass"])
 	
 	#print _conn
 	return _conn
 
 	
-def search(conn, filter):
-	return conn.search_s(config["basedn"], ldap.SCOPE_SUBTREE, filter)
+def search(conn, filter, subtree=False):
+	scope = ldap.SCOPE_ONELEVEL
+	if (subtree):
+		scope = ldap.SCOPE_SUBTREE
+	return conn.search_s(config["basedn"], scope, filter)
 
 def listdn(result):
 	for r in result:
+		if len(r[1]) == 1 and len(r[1][0]) > 4 and r[1][0][0:4] == "ldap": # skip referrals
+			continue
 		print r[0]
 
 def get_config():
