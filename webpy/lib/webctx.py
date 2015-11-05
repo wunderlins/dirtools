@@ -22,7 +22,9 @@ urls = (
   '/json2', 'webctx.json2',
   '/image', 'webctx.image',
   '/login', 'webctx.login',
-  '/bootstrap', 'webctx.bootstrap'
+  '/bootstrap', 'webctx.bootstrap',
+  '/dojo-test', 'webctx.dojo_test',
+  
 )
 
 def is_dict(d):
@@ -204,20 +206,16 @@ class index(webctx):
 		return render.borderlayout()
 		#return out
 
-"""
-class index(webctx):
+
+class dojo_test(webctx):
 	"" " Serve index page " ""
 	def GET(self):
-		if not self.auth_check():
-			return self.render().login()
+		#if not self.auth_check():
+		#	return self.render().login()
 			
-		#web.debug(auth_check)
-		#web.debug(session)
-		
 		render = web.template.render('template')
-		return render.index()
-		#return out
-"""
+		return render.dojo_test()
+
 class bootstrap(webctx):
 	""" Serve bootstrap example page """
 	def GET(self):
